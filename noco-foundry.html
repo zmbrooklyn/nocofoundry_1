@@ -1,0 +1,1718 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NoCo Foundry — SharePoint Consulting</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --forge-black: #0a0a0b;
+    --forge-dark: #111114;
+    --forge-panel: #16161a;
+    --forge-border: #2a2a32;
+    --forge-orange: #e8601a;
+    --forge-amber: #f5a623;
+    --forge-steel: #8892a4;
+    --forge-light: #c8d0de;
+    --forge-white: #eef0f5;
+    --font-display: 'Bebas Neue', sans-serif;
+    --font-body: 'Outfit', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--forge-black);
+    color: var(--forge-light);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.6;
+    overflow-x: hidden;
+    cursor: none;
+  }
+
+  /* CUSTOM CURSOR */
+  .cursor {
+    width: 12px; height: 12px;
+    background: var(--forge-orange);
+    border-radius: 50%;
+    position: fixed; top: 0; left: 0;
+    pointer-events: none; z-index: 9999;
+    transform: translate(-50%, -50%);
+    transition: transform 0.1s ease, width 0.2s, height 0.2s, background 0.2s;
+    mix-blend-mode: normal;
+  }
+  .cursor-ring {
+    width: 36px; height: 36px;
+    border: 1.5px solid rgba(232,96,26,0.5);
+    border-radius: 50%;
+    position: fixed; top: 0; left: 0;
+    pointer-events: none; z-index: 9998;
+    transform: translate(-50%, -50%);
+    transition: transform 0.18s ease, width 0.25s, height 0.25s, border-color 0.2s;
+  }
+  body:has(a:hover) .cursor, body:has(button:hover) .cursor { width: 20px; height: 20px; background: var(--forge-amber); }
+  body:has(a:hover) .cursor-ring, body:has(button:hover) .cursor-ring { width: 56px; height: 56px; border-color: var(--forge-amber); }
+
+  /* NOISE OVERLAY */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 1000; opacity: 0.4;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 500;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 3rem;
+    height: 72px;
+    background: rgba(10,10,11,0.85);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid var(--forge-border);
+    transition: background 0.3s;
+  }
+
+  .nav-logo {
+    display: flex; align-items: center; gap: 12px;
+    text-decoration: none;
+  }
+  .nav-logo-mark {
+    width: 38px; height: 38px;
+    background: var(--forge-orange);
+    clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+    animation: logo-pulse 4s ease-in-out infinite;
+  }
+  @keyframes logo-pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(232,96,26,0.4); }
+    50% { box-shadow: 0 0 0 12px rgba(232,96,26,0); }
+  }
+  .nav-logo-text {
+    font-family: var(--font-display);
+    font-size: 1.5rem;
+    letter-spacing: 0.08em;
+    color: var(--forge-white);
+  }
+  .nav-logo-text span { color: var(--forge-orange); }
+
+  .nav-links { display: flex; align-items: center; gap: 2.5rem; }
+  .nav-links a {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--forge-steel);
+    text-decoration: none;
+    transition: color 0.2s;
+    position: relative;
+  }
+  .nav-links a::after {
+    content: '';
+    position: absolute; bottom: -4px; left: 0; right: 0; height: 1px;
+    background: var(--forge-orange);
+    transform: scaleX(0); transform-origin: left;
+    transition: transform 0.25s ease;
+  }
+  .nav-links a:hover { color: var(--forge-white); }
+  .nav-links a:hover::after { transform: scaleX(1); }
+
+  .nav-cta {
+    background: var(--forge-orange);
+    color: var(--forge-white) !important;
+    padding: 0.55rem 1.4rem;
+    font-family: var(--font-mono) !important;
+    font-size: 0.7rem !important;
+    letter-spacing: 0.1em;
+    text-decoration: none;
+    transition: background 0.2s, transform 0.15s !important;
+    clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+  }
+  .nav-cta:hover { background: var(--forge-amber) !important; transform: translateY(-1px) !important; }
+  .nav-cta::after { display: none !important; }
+
+  /* HERO */
+  #hero {
+    min-height: 100vh;
+    display: flex; align-items: center;
+    padding: 120px 3rem 6rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .hero-bg {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 60% 50% at 65% 50%, rgba(232,96,26,0.08) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 40% at 80% 20%, rgba(245,166,35,0.05) 0%, transparent 60%);
+  }
+
+  .hero-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(42,42,50,0.3) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(42,42,50,0.3) 1px, transparent 1px);
+    background-size: 60px 60px;
+    mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 0%, transparent 80%);
+  }
+
+  .hero-content { position: relative; z-index: 2; max-width: 780px; }
+
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--forge-orange);
+    border: 1px solid rgba(232,96,26,0.3);
+    padding: 0.4rem 1rem;
+    margin-bottom: 2rem;
+    opacity: 0; animation: fade-up 0.6s ease 0.2s forwards;
+  }
+  .hero-badge-dot {
+    width: 6px; height: 6px;
+    background: var(--forge-orange);
+    border-radius: 50%;
+    animation: blink 1.5s ease-in-out infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+  .hero-title {
+    font-family: var(--font-display);
+    font-size: clamp(3.5rem, 8vw, 7rem);
+    line-height: 0.95;
+    letter-spacing: 0.02em;
+    color: var(--forge-white);
+    margin-bottom: 1.8rem;
+    opacity: 0; animation: fade-up 0.7s ease 0.4s forwards;
+  }
+  .hero-title .line-accent { color: var(--forge-orange); display: block; }
+
+  .hero-sub {
+    font-size: 1.15rem;
+    font-weight: 300;
+    color: var(--forge-steel);
+    max-width: 520px;
+    line-height: 1.7;
+    margin-bottom: 3rem;
+    opacity: 0; animation: fade-up 0.7s ease 0.6s forwards;
+  }
+  .hero-sub strong { color: var(--forge-light); font-weight: 500; }
+
+  .hero-actions {
+    display: flex; gap: 1.2rem; flex-wrap: wrap;
+    opacity: 0; animation: fade-up 0.7s ease 0.8s forwards;
+  }
+
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--forge-orange);
+    color: var(--forge-white);
+    padding: 1rem 2.2rem;
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 0.95rem;
+    letter-spacing: 0.03em;
+    text-decoration: none;
+    clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+    transition: background 0.2s, transform 0.15s;
+    border: none; cursor: none;
+  }
+  .btn-primary:hover { background: var(--forge-amber); transform: translateY(-2px); }
+
+  .btn-ghost {
+    display: inline-flex; align-items: center; gap: 10px;
+    color: var(--forge-light);
+    padding: 1rem 2.2rem;
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-size: 0.95rem;
+    text-decoration: none;
+    border: 1px solid var(--forge-border);
+    transition: border-color 0.2s, color 0.2s, transform 0.15s;
+    cursor: none;
+  }
+  .btn-ghost:hover { border-color: var(--forge-orange); color: var(--forge-orange); transform: translateY(-2px); }
+
+  .hero-stats {
+    position: absolute; right: 3rem; bottom: 4rem;
+    display: flex; flex-direction: column; gap: 2rem;
+    opacity: 0; animation: fade-left 0.8s ease 1s forwards;
+  }
+  .stat-item { text-align: right; }
+  .stat-num {
+    font-family: var(--font-display);
+    font-size: 2.8rem;
+    color: var(--forge-white);
+    letter-spacing: 0.02em;
+    line-height: 1;
+  }
+  .stat-num span { color: var(--forge-orange); }
+  .stat-label {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--forge-steel);
+  }
+
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(28px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fade-left {
+    from { opacity: 0; transform: translateX(28px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  /* SECTION BASE */
+  section { padding: 7rem 3rem; position: relative; }
+  .section-label {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--forge-orange);
+    margin-bottom: 1rem;
+  }
+  .section-title {
+    font-family: var(--font-display);
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    color: var(--forge-white);
+    letter-spacing: 0.03em;
+    line-height: 1.05;
+    margin-bottom: 1.2rem;
+  }
+  .section-sub {
+    font-size: 1rem;
+    color: var(--forge-steel);
+    max-width: 560px;
+    line-height: 1.7;
+  }
+
+  /* SERVICES */
+  #services { background: var(--forge-dark); }
+  .services-header { margin-bottom: 4rem; }
+
+  .services-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5px;
+    background: var(--forge-border);
+  }
+
+  .service-card {
+    background: var(--forge-panel);
+    padding: 2.8rem 2.2rem;
+    position: relative;
+    overflow: hidden;
+    transition: background 0.25s;
+    cursor: none;
+  }
+  .service-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: var(--forge-orange);
+    transform: scaleX(0); transform-origin: left;
+    transition: transform 0.35s ease;
+  }
+  .service-card:hover { background: #1c1c22; }
+  .service-card:hover::before { transform: scaleX(1); }
+
+  .service-card.featured {
+    background: linear-gradient(135deg, rgba(232,96,26,0.08) 0%, var(--forge-panel) 60%);
+    border: none;
+  }
+  .service-card.featured::before { transform: scaleX(1); }
+
+  .service-tag {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--forge-orange);
+    background: rgba(232,96,26,0.12);
+    padding: 0.25rem 0.7rem;
+    display: inline-block;
+    margin-bottom: 1.5rem;
+  }
+
+  .service-icon {
+    font-size: 2.2rem;
+    margin-bottom: 1.2rem;
+    display: block;
+  }
+
+  .service-name {
+    font-family: var(--font-display);
+    font-size: 1.7rem;
+    color: var(--forge-white);
+    letter-spacing: 0.04em;
+    margin-bottom: 0.8rem;
+  }
+
+  .service-desc {
+    font-size: 0.9rem;
+    color: var(--forge-steel);
+    line-height: 1.7;
+    margin-bottom: 1.8rem;
+  }
+
+  .service-features {
+    list-style: none;
+    display: flex; flex-direction: column; gap: 0.5rem;
+    margin-bottom: 2rem;
+  }
+  .service-features li {
+    font-size: 0.85rem;
+    color: var(--forge-light);
+    display: flex; align-items: flex-start; gap: 8px;
+  }
+  .service-features li::before {
+    content: '—';
+    color: var(--forge-orange);
+    flex-shrink: 0;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    margin-top: 2px;
+  }
+
+  .service-price {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    color: var(--forge-amber);
+    letter-spacing: 0.05em;
+  }
+  .service-price-sub {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    color: var(--forge-steel);
+    letter-spacing: 0.1em;
+    margin-top: 2px;
+  }
+
+  /* PACKAGES */
+  #packages {
+    background: var(--forge-black);
+    border-top: 1px solid var(--forge-border);
+  }
+
+  .packages-intro { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: start; margin-bottom: 5rem; }
+
+  .tab-controls {
+    display: flex; gap: 0; margin-bottom: 3rem;
+    border: 1px solid var(--forge-border);
+    width: fit-content;
+  }
+  .tab-btn {
+    padding: 0.8rem 2rem;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    background: transparent;
+    color: var(--forge-steel);
+    border: none;
+    cursor: none;
+    transition: all 0.2s;
+  }
+  .tab-btn.active {
+    background: var(--forge-orange);
+    color: var(--forge-white);
+  }
+  .tab-btn:not(.active):hover { background: rgba(255,255,255,0.04); color: var(--forge-light); }
+
+  .packages-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1px;
+    background: var(--forge-border);
+  }
+
+  .pkg-card {
+    background: var(--forge-panel);
+    padding: 2.5rem 2rem;
+    position: relative;
+    transition: background 0.25s;
+  }
+  .pkg-card.highlighted {
+    background: var(--forge-dark);
+    outline: 1.5px solid var(--forge-orange);
+    z-index: 2;
+  }
+
+  .pkg-badge {
+    position: absolute; top: -1px; right: 2rem;
+    background: var(--forge-orange);
+    color: var(--forge-white);
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.3rem 0.8rem;
+    clip-path: polygon(0 0, 100% 0, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+  }
+
+  .pkg-tier {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--forge-steel);
+    margin-bottom: 0.5rem;
+  }
+  .pkg-name {
+    font-family: var(--font-display);
+    font-size: 1.9rem;
+    color: var(--forge-white);
+    letter-spacing: 0.04em;
+    margin-bottom: 0.5rem;
+  }
+  .pkg-price {
+    font-family: var(--font-display);
+    font-size: 2.6rem;
+    color: var(--forge-amber);
+    letter-spacing: 0.02em;
+    line-height: 1;
+    margin-bottom: 0.3rem;
+  }
+  .pkg-price-note {
+    font-size: 0.78rem;
+    color: var(--forge-steel);
+    margin-bottom: 2rem;
+    font-style: italic;
+  }
+  .pkg-divider {
+    height: 1px;
+    background: var(--forge-border);
+    margin: 1.5rem 0;
+  }
+  .pkg-features {
+    list-style: none;
+    display: flex; flex-direction: column; gap: 0.7rem;
+    margin-bottom: 2rem;
+  }
+  .pkg-features li {
+    font-size: 0.88rem;
+    color: var(--forge-steel);
+    display: flex; align-items: flex-start; gap: 10px;
+    line-height: 1.4;
+  }
+  .pkg-features li .check {
+    color: var(--forge-orange);
+    flex-shrink: 0;
+    font-weight: 700;
+    margin-top: 1px;
+  }
+  .pkg-features li.included { color: var(--forge-light); }
+
+  .pkg-btn {
+    display: block; width: 100%;
+    text-align: center;
+    padding: 0.85rem;
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 0.88rem;
+    text-decoration: none;
+    cursor: none;
+    transition: all 0.2s;
+    border: 1px solid var(--forge-border);
+    color: var(--forge-light);
+    background: transparent;
+  }
+  .pkg-btn:hover { border-color: var(--forge-orange); color: var(--forge-orange); }
+  .pkg-btn.primary-btn {
+    background: var(--forge-orange);
+    border-color: var(--forge-orange);
+    color: var(--forge-white);
+    clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+  }
+  .pkg-btn.primary-btn:hover { background: var(--forge-amber); border-color: var(--forge-amber); }
+
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* INDUSTRIES */
+  #industries {
+    background: var(--forge-dark);
+    border-top: 1px solid var(--forge-border);
+  }
+
+  .industries-layout { display: grid; grid-template-columns: 1fr 1.6fr; gap: 5rem; align-items: start; }
+
+  .industry-list { display: flex; flex-direction: column; gap: 0; margin-top: 3rem; }
+  .industry-item {
+    display: flex; align-items: center; gap: 1.2rem;
+    padding: 1.1rem 1rem;
+    border-bottom: 1px solid var(--forge-border);
+    cursor: none;
+    transition: background 0.2s;
+    position: relative;
+  }
+  .industry-item:hover { background: rgba(232,96,26,0.05); }
+  .industry-item.active { background: rgba(232,96,26,0.08); }
+  .industry-item.active .industry-name { color: var(--forge-white); }
+  .industry-item.active .industry-arrow { color: var(--forge-orange); opacity: 1; }
+
+  .industry-icon { font-size: 1.3rem; width: 36px; text-align: center; flex-shrink: 0; }
+  .industry-name {
+    font-weight: 500;
+    color: var(--forge-steel);
+    font-size: 0.92rem;
+    flex: 1;
+    transition: color 0.2s;
+  }
+  .industry-tier {
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    color: var(--forge-orange);
+    background: rgba(232,96,26,0.1);
+    padding: 0.2rem 0.5rem;
+  }
+  .industry-arrow { color: var(--forge-border); font-size: 0.9rem; transition: color 0.2s; opacity: 0.5; }
+
+  .industry-detail {
+    background: var(--forge-panel);
+    border: 1px solid var(--forge-border);
+    border-left: 3px solid var(--forge-orange);
+    padding: 3rem;
+    position: sticky; top: 100px;
+  }
+  .detail-placeholder {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    min-height: 400px; text-align: center; gap: 1rem;
+  }
+  .detail-placeholder-icon { font-size: 3rem; opacity: 0.3; }
+  .detail-placeholder-text { font-size: 0.85rem; color: var(--forge-steel); }
+
+  .detail-content { display: none; }
+  .detail-content.visible { display: block; }
+  .detail-industry-name {
+    font-family: var(--font-display);
+    font-size: 2.2rem;
+    color: var(--forge-white);
+    letter-spacing: 0.04em;
+    margin-bottom: 0.5rem;
+  }
+  .detail-tag {
+    font-family: var(--font-mono); font-size: 0.65rem; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--forge-orange);
+    margin-bottom: 1.5rem; display: block;
+  }
+  .detail-desc { font-size: 0.92rem; color: var(--forge-steel); line-height: 1.7; margin-bottom: 2rem; }
+  .detail-pains { margin-bottom: 2rem; }
+  .detail-pains-title {
+    font-family: var(--font-mono); font-size: 0.65rem; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--forge-steel); margin-bottom: 1rem;
+  }
+  .pain-tag {
+    display: inline-block;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--forge-border);
+    color: var(--forge-light);
+    font-size: 0.78rem;
+    padding: 0.35rem 0.8rem;
+    margin: 0.2rem;
+  }
+  .detail-revenue {
+    display: flex; gap: 2rem;
+    border-top: 1px solid var(--forge-border);
+    padding-top: 1.5rem;
+  }
+  .rev-item {}
+  .rev-label { font-family: var(--font-mono); font-size: 0.6rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--forge-steel); }
+  .rev-value { font-family: var(--font-display); font-size: 1.5rem; color: var(--forge-amber); letter-spacing: 0.04em; }
+
+  /* PROCESS */
+  #process {
+    background: var(--forge-black);
+    border-top: 1px solid var(--forge-border);
+  }
+  .process-steps {
+    display: grid; grid-template-columns: repeat(5, 1fr);
+    gap: 0; margin-top: 4rem; position: relative;
+  }
+  .process-steps::before {
+    content: '';
+    position: absolute;
+    top: 38px; left: 10%; right: 10%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--forge-orange), var(--forge-amber), var(--forge-orange), transparent);
+    z-index: 0;
+  }
+  .process-step { text-align: center; padding: 0 1.5rem; position: relative; z-index: 1; }
+  .step-num {
+    width: 76px; height: 76px;
+    background: var(--forge-panel);
+    border: 2px solid var(--forge-border);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1.5rem;
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    color: var(--forge-white);
+    transition: all 0.3s;
+    position: relative;
+  }
+  .process-step:hover .step-num {
+    background: var(--forge-orange);
+    border-color: var(--forge-orange);
+    transform: scale(1.08);
+  }
+  .step-name {
+    font-weight: 600;
+    font-size: 0.88rem;
+    color: var(--forge-white);
+    margin-bottom: 0.5rem;
+  }
+  .step-desc {
+    font-size: 0.78rem;
+    color: var(--forge-steel);
+    line-height: 1.6;
+  }
+
+  /* CONTACT */
+  #contact {
+    background: var(--forge-dark);
+    border-top: 1px solid var(--forge-border);
+  }
+  .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: start; }
+
+  .contact-perks { display: flex; flex-direction: column; gap: 1.5rem; margin-top: 2.5rem; }
+  .perk-item { display: flex; gap: 1.2rem; align-items: flex-start; }
+  .perk-icon {
+    width: 44px; height: 44px; flex-shrink: 0;
+    background: rgba(232,96,26,0.1);
+    border: 1px solid rgba(232,96,26,0.2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem;
+  }
+  .perk-name { font-weight: 600; color: var(--forge-white); font-size: 0.92rem; margin-bottom: 0.25rem; }
+  .perk-desc { font-size: 0.82rem; color: var(--forge-steel); line-height: 1.6; }
+
+  .contact-form { display: flex; flex-direction: column; gap: 1.2rem; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.2rem; }
+  .form-group { display: flex; flex-direction: column; gap: 0.5rem; }
+  .form-label {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--forge-steel);
+  }
+  .form-input, .form-select, .form-textarea {
+    background: var(--forge-panel);
+    border: 1px solid var(--forge-border);
+    color: var(--forge-light);
+    padding: 0.85rem 1rem;
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+    width: 100%;
+    cursor: none;
+  }
+  .form-input:focus, .form-select:focus, .form-textarea:focus {
+    border-color: var(--forge-orange);
+  }
+  .form-select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%238892a4' stroke-width='1.5' fill='none'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 1rem center; }
+  .form-select option { background: var(--forge-panel); }
+  .form-textarea { resize: vertical; min-height: 120px; }
+
+  .form-submit {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    background: var(--forge-orange);
+    color: var(--forge-white);
+    padding: 1.1rem 2rem;
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 1rem;
+    border: none;
+    cursor: none;
+    clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+    transition: background 0.2s, transform 0.15s;
+    width: 100%;
+  }
+  .form-submit:hover { background: var(--forge-amber); transform: translateY(-2px); }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 800;
+    background: rgba(10,10,11,0.92);
+    backdrop-filter: blur(8px);
+    display: flex; align-items: center; justify-content: center;
+    padding: 2rem;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.3s;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+  .modal {
+    background: var(--forge-panel);
+    border: 1px solid var(--forge-border);
+    border-top: 3px solid var(--forge-orange);
+    max-width: 560px; width: 100%;
+    padding: 3rem;
+    transform: translateY(20px);
+    transition: transform 0.3s;
+    position: relative;
+  }
+  .modal-overlay.open .modal { transform: translateY(0); }
+  .modal-close {
+    position: absolute; top: 1.2rem; right: 1.5rem;
+    background: none; border: none;
+    color: var(--forge-steel); font-size: 1.5rem;
+    cursor: none; transition: color 0.2s;
+  }
+  .modal-close:hover { color: var(--forge-white); }
+  .modal-title {
+    font-family: var(--font-display);
+    font-size: 2rem; color: var(--forge-white);
+    letter-spacing: 0.04em; margin-bottom: 0.5rem;
+  }
+  .modal-sub { font-size: 0.88rem; color: var(--forge-steel); margin-bottom: 2rem; }
+  .modal-form { display: flex; flex-direction: column; gap: 1rem; }
+  .modal-submit {
+    background: var(--forge-orange); border: none;
+    color: white; padding: 0.9rem; font-family: var(--font-body);
+    font-weight: 600; font-size: 0.95rem; cursor: none;
+    clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+    transition: background 0.2s;
+  }
+  .modal-submit:hover { background: var(--forge-amber); }
+
+  /* SUCCESS */
+  .success-msg {
+    text-align: center; padding: 2rem 0;
+    display: none;
+  }
+  .success-msg.show { display: block; }
+  .success-icon { font-size: 3rem; margin-bottom: 1rem; }
+  .success-title { font-family: var(--font-display); font-size: 2rem; color: var(--forge-white); margin-bottom: 0.5rem; }
+  .success-desc { color: var(--forge-steel); font-size: 0.9rem; }
+
+  /* FOOTER */
+  footer {
+    background: var(--forge-black);
+    border-top: 1px solid var(--forge-border);
+    padding: 4rem 3rem 2rem;
+  }
+  .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 4rem; margin-bottom: 3rem; }
+  .footer-brand p { font-size: 0.88rem; color: var(--forge-steel); line-height: 1.7; margin-top: 1rem; max-width: 280px; }
+  .footer-col-title {
+    font-family: var(--font-mono); font-size: 0.65rem; letter-spacing: 0.15em;
+    text-transform: uppercase; color: var(--forge-orange); margin-bottom: 1.2rem;
+  }
+  .footer-links { list-style: none; display: flex; flex-direction: column; gap: 0.7rem; }
+  .footer-links a { font-size: 0.85rem; color: var(--forge-steel); text-decoration: none; transition: color 0.2s; cursor: none; }
+  .footer-links a:hover { color: var(--forge-light); }
+  .footer-bottom {
+    border-top: 1px solid var(--forge-border);
+    padding-top: 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .footer-copy { font-size: 0.78rem; color: var(--forge-steel); font-family: var(--font-mono); }
+  .footer-copy span { color: var(--forge-orange); }
+
+  /* SCROLL REVEAL */
+  .reveal { opacity: 0; transform: translateY(30px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* MOBILE NAV TOGGLE */
+  .nav-toggle { display: none; background: none; border: none; color: var(--forge-light); font-size: 1.5rem; cursor: none; }
+
+  @media (max-width: 1024px) {
+    .services-grid { grid-template-columns: 1fr 1fr; }
+    .packages-grid { grid-template-columns: 1fr; gap: 1px; }
+    .industries-layout { grid-template-columns: 1fr; }
+    .process-steps { grid-template-columns: 1fr 1fr; gap: 2rem; }
+    .process-steps::before { display: none; }
+    .contact-grid { grid-template-columns: 1fr; }
+    .footer-grid { grid-template-columns: 1fr 1fr; }
+    .hero-stats { display: none; }
+  }
+  @media (max-width: 768px) {
+    nav { padding: 0 1.5rem; }
+    section { padding: 5rem 1.5rem; }
+    .nav-links { display: none; position: absolute; top: 72px; left: 0; right: 0; background: var(--forge-dark); border-bottom: 1px solid var(--forge-border); flex-direction: column; padding: 2rem; gap: 1.5rem; z-index: 100; }
+    .nav-links.open { display: flex; }
+    .nav-toggle { display: block; }
+    .services-grid, .packages-grid { grid-template-columns: 1fr; }
+    .process-steps { grid-template-columns: 1fr; }
+    .footer-grid { grid-template-columns: 1fr; }
+    .hero-title { font-size: 3.2rem; }
+    .packages-intro { grid-template-columns: 1fr; gap: 2rem; }
+    .form-row { grid-template-columns: 1fr; }
+    body { cursor: auto; }
+    .cursor, .cursor-ring { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="#hero" class="nav-logo">
+    <div class="nav-logo-mark"></div>
+    <span class="nav-logo-text">NOCO<span>.</span>FOUNDRY</span>
+  </a>
+  <div class="nav-links" id="navLinks">
+    <a href="#services">Services</a>
+    <a href="#packages">Packages</a>
+    <a href="#industries">Industries</a>
+    <a href="#process">Process</a>
+    <a href="#contact">Contact</a>
+    <a href="#contact" class="nav-cta">Book a Call</a>
+  </div>
+  <button class="nav-toggle" id="navToggle">☰</button>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="hero-badge">
+      <div class="hero-badge-dot"></div>
+      Microsoft 365 &amp; SharePoint Specialists
+    </div>
+    <h1 class="hero-title">
+      FORGE YOUR
+      <span class="line-accent">DIGITAL</span>
+      WORKPLACE
+    </h1>
+    <p class="hero-sub">
+      NoCo Foundry transforms <strong>document chaos</strong> into structured, searchable, <strong>compliant SharePoint environments</strong> — from full-scale migrations to ongoing management and intelligent automation.
+    </p>
+    <div class="hero-actions">
+      <a href="#packages" class="btn-primary">
+        View Packages
+        <span>→</span>
+      </a>
+      <a href="#contact" class="btn-ghost">
+        Book Discovery Call
+        <span>↗</span>
+      </a>
+    </div>
+  </div>
+  <div class="hero-stats">
+    <div class="stat-item">
+      <div class="stat-num">36<span>x</span></div>
+      <div class="stat-label">Avg. Client ROI</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">30<span>day</span></div>
+      <div class="stat-label">Go-Live Target</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num">M365</div>
+      <div class="stat-label">Certified Partner</div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section id="services">
+  <div class="services-header reveal">
+    <div class="section-label">// What We Build</div>
+    <h2 class="section-title">CORE SERVICES</h2>
+    <p class="section-sub">From first migration to full-scale intelligent automation — we cover every stage of your Microsoft 365 journey.</p>
+  </div>
+
+  <div class="services-grid">
+    <div class="service-card featured reveal">
+      <div class="service-tag">⭐ Most Popular</div>
+      <span class="service-icon">🔄</span>
+      <div class="service-name">SHAREPOINT MIGRATION</div>
+      <p class="service-desc">Move from shared drives, Google Drive, Dropbox, or legacy systems to a structured, searchable SharePoint environment. We handle everything — metadata mapping, permissions, cleanup, and validation.</p>
+      <ul class="service-features">
+        <li>Full source-to-destination data assessment</li>
+        <li>Metadata architecture & tagging strategy</li>
+        <li>Permission mapping & security groups</li>
+        <li>Content cleanup & deduplication</li>
+        <li>User acceptance testing & validation</li>
+        <li>Post-migration support included</li>
+      </ul>
+      <div class="service-price">$6,500 — $150,000+</div>
+      <div class="service-price-sub">Based on size & complexity</div>
+    </div>
+
+    <div class="service-card reveal">
+      <div class="service-tag">Foundation</div>
+      <span class="service-icon">🏗️</span>
+      <div class="service-name">SHAREPOINT SETUP</div>
+      <p class="service-desc">Build a modern SharePoint intranet, team site, or document management system from the ground up — architected for your industry, your workflows, and your users.</p>
+      <ul class="service-features">
+        <li>Information architecture design</li>
+        <li>Branded intranet portal build</li>
+        <li>Department site structure</li>
+        <li>Governance & naming policies</li>
+        <li>User training & adoption support</li>
+        <li>Admin documentation handover</li>
+      </ul>
+      <div class="service-price">$8,500 — $45,000</div>
+      <div class="service-price-sub">Fixed-scope packages available</div>
+    </div>
+
+    <div class="service-card reveal">
+      <div class="service-tag">Recurring</div>
+      <span class="service-icon">🛡️</span>
+      <div class="service-name">ONGOING MANAGEMENT</div>
+      <p class="service-desc">Keep your SharePoint environment healthy, current, and expanding. Monthly retainer support covering governance, user requests, optimization, and proactive improvements.</p>
+      <ul class="service-features">
+        <li>Unlimited user support requests</li>
+        <li>Monthly health & usage reporting</li>
+        <li>Proactive governance enforcement</li>
+        <li>Feature rollout management</li>
+        <li>Quarterly strategy review</li>
+        <li>Priority response SLA</li>
+      </ul>
+      <div class="service-price">$1,500 — $8,000/mo</div>
+      <div class="service-price-sub">Billed monthly, cancel anytime</div>
+    </div>
+
+    <div class="service-card reveal">
+      <div class="service-tag">Add-On</div>
+      <span class="service-icon">⚡</span>
+      <div class="service-name">POWER AUTOMATE</div>
+      <p class="service-desc">Eliminate repetitive manual processes with intelligent automation flows. Approval workflows, notifications, data routing, and cross-system integrations built on Microsoft Power Automate.</p>
+      <ul class="service-features">
+        <li>Approval & routing workflows</li>
+        <li>Automated alerts & notifications</li>
+        <li>Cross-app integrations (Teams, Outlook, Dynamics)</li>
+        <li>Scheduled data processing flows</li>
+      </ul>
+      <div class="service-price">$2,500 — $12,000</div>
+      <div class="service-price-sub">Per workflow implementation</div>
+    </div>
+
+    <div class="service-card reveal">
+      <div class="service-tag">Add-On</div>
+      <span class="service-icon">📱</span>
+      <div class="service-name">POWERAPPS DEVELOPMENT</div>
+      <p class="service-desc">Custom canvas and model-driven applications that replace paper forms, spreadsheets, and disconnected tools — built on the Microsoft Power Platform for seamless SharePoint integration.</p>
+      <ul class="service-features">
+        <li>Mobile-first canvas apps</li>
+        <li>SharePoint-connected data apps</li>
+        <li>Form replacement apps</li>
+        <li>Inspection & audit apps</li>
+      </ul>
+      <div class="service-price">$4,000 — $25,000</div>
+      <div class="service-price-sub">Scope-dependent pricing</div>
+    </div>
+
+    <div class="service-card reveal">
+      <div class="service-tag">Add-On</div>
+      <span class="service-icon">📊</span>
+      <div class="service-name">POWER BI DASHBOARDS</div>
+      <p class="service-desc">Transform SharePoint lists, Excel files, and Microsoft 365 data into interactive visualizations that give leadership real-time operational visibility without manual reporting.</p>
+      <ul class="service-features">
+        <li>Operational reporting dashboards</li>
+        <li>SharePoint & Teams analytics</li>
+        <li>Executive KPI reporting</li>
+        <li>Embedded SharePoint reports</li>
+      </ul>
+      <div class="service-price">$3,000 — $15,000</div>
+      <div class="service-price-sub">Per dashboard build</div>
+    </div>
+  </div>
+</section>
+
+<!-- PACKAGES -->
+<section id="packages">
+  <div class="packages-intro">
+    <div class="reveal">
+      <div class="section-label">// Transparent Pricing</div>
+      <h2 class="section-title">CHOOSE YOUR PACKAGE</h2>
+      <p class="section-sub">Fixed-scope packages designed for clarity. No surprises, no scope creep — just defined deliverables and guaranteed outcomes.</p>
+    </div>
+    <div class="reveal">
+      <div class="tab-controls">
+        <button class="tab-btn active" data-tab="migration">Migration</button>
+        <button class="tab-btn" data-tab="setup">Setup</button>
+        <button class="tab-btn" data-tab="support">Support</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MIGRATION PACKAGES -->
+  <div class="tab-content active" id="tab-migration">
+    <div class="packages-grid">
+      <div class="pkg-card reveal">
+        <div class="pkg-tier">Tier 01</div>
+        <div class="pkg-name">STARTER SPRINT</div>
+        <div class="pkg-price">$6,500</div>
+        <div class="pkg-price-note">One-time project fee · Up to 100GB · 25 users</div>
+        <div class="pkg-divider"></div>
+        <ul class="pkg-features">
+          <li class="included"><span class="check">✓</span> Single source migration (shared drive or Google Drive)</li>
+          <li class="included"><span class="check">✓</span> Basic folder → library structure mapping</li>
+          <li class="included"><span class="check">✓</span> Permission group setup (up to 5 groups)</li>
+          <li class="included"><span class="check">✓</span> Content cleanup & duplicate removal</li>
+          <li class="included"><span class="check">✓</span> 1 user training session (up to 2hrs)</li>
+          <li class="included"><span class="check">✓</span> 30-day post-migration support</li>
+          <li><span class="check" style="color:var(--forge-border)">—</span> Metadata architecture</li>
+          <li><span class="check" style="color:var(--forge-border)">—</span> Multi-source migration</li>
+        </ul>
+        <a href="#contact" class="pkg-btn" onclick="openModal('Starter Sprint Migration')">Get Started →</a>
+      </div>
+      <div class="pkg-card highlighted reveal">
+        <div class="pkg-badge">Most Popular</div>
+        <div class="pkg-tier">Tier 02</div>
+        <div class="pkg-name">GROWTH BUILD</div>
+        <div class="pkg-price">$18,500</div>
+        <div class="pkg-price-note">One-time project fee · Up to 500GB · 100 users</div>
+        <div class="pkg-divider"></div>
+        <ul class="pkg-features">
+          <li class="included"><span class="check">✓</span> Multi-source migration (up to 3 sources)</li>
+          <li class="included"><span class="check">✓</span> Full metadata architecture & tagging</li>
+          <li class="included"><span class="check">✓</span> Department site structure build</li>
+          <li class="included"><span class="check">✓</span> Advanced permission mapping</li>
+          <li class="included"><span class="check">✓</span> Content type & column configuration</li>
+          <li class="included"><span class="check">✓</span> 3 user training sessions</li>
+          <li class="included"><span class="check">✓</span> Admin documentation package</li>
+          <li class="included"><span class="check">✓</span> 60-day post-migration support</li>
+        </ul>
+        <a href="#contact" class="pkg-btn primary-btn" onclick="openModal('Growth Build Migration')">Get Started →</a>
+      </div>
+      <div class="pkg-card reveal">
+        <div class="pkg-tier">Tier 03</div>
+        <div class="pkg-name">ENTERPRISE</div>
+        <div class="pkg-price">$40,000+</div>
+        <div class="pkg-price-note">Custom scoped · 200+ users · Complex environments</div>
+        <div class="pkg-divider"></div>
+        <ul class="pkg-features">
+          <li class="included"><span class="check">✓</span> Unlimited source migration</li>
+          <li class="included"><span class="check">✓</span> Full IA & governance framework</li>
+          <li class="included"><span class="check">✓</span> DLP & compliance policy setup</li>
+          <li class="included"><span class="check">✓</span> Power Automate migration workflows</li>
+          <li class="included"><span class="check">✓</span> Change management program</li>
+          <li class="included"><span class="check">✓</span> Champion enablement program</li>
+          <li class="included"><span class="check">✓</span> Executive reporting dashboard</li>
+          <li class="included"><span class="check">✓</span> 90-day hypercare support</li>
+        </ul>
+        <a href="#contact" class="pkg-btn" onclick="openModal('Enterprise Migration')">Request Scope →</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- SETUP PACKAGES -->
+  <div class="tab-content" id="tab-setup">
+    <div class="packages-grid">
+      <div class="pkg-card reveal">
+        <div class="pkg-tier">Setup 01</div>
+        <div class="pkg-name">LAUNCHPAD</div>
+        <div class="pkg-price">$8,500</div>
+        <div class="pkg-price-note">6-week delivery · Under 50 users</div>
+        <div class="pkg-divider"></div>
+        <ul class="pkg-features">
+          <li class="included"><span class="check">✓</span> SharePoint intranet homepage</li>
+          <li class="included"><span class="check">✓</span> Up to 3 department team sites</li>
+          <li class="included"><span class="check">✓</span> Document library setup</li>
+          <li class="included"><span class="check">✓</span> Basic navigation & branding</li>
+          <li class="included"><span class="check">✓</span> User & permission setup</li>
+          <li class="included"><span class="check">✓</span> 1 onboarding training session</li>
+          <li><span class="check" style="color:var(--forge-border)">—</span> Custom workflows</li>
+          <li><span class="check" style="color:var(--forge-border)">—</span> Power Platform integration</li>
+        </ul>
+        <a href="#contact" class="pkg-btn" onclick="openModal('Launchpad Setup')">Get Started →</a>
+      </div>
+      <div class="pkg-card highlighted reveal">
+        <div class="pkg-badge">Best Value</div>
+        <div class="pkg-tier">Setup 02</div>
+        <div class="pkg-name">FULL FORGE</div>
+        <div class="pkg-price">$24,500</div>
+        <div class="pkg-price-note">10-week delivery · Up to 150 users</div>
+        <div class="pkg-divider"></div>
+        <ul class="pkg-features">
+          <li class="included"><span class="check">✓</span> Full branded intranet portal</li>
+          <li class="included"><span class="check">✓</span> Up to 8 department sites</li>
+          <li class="included"><span class="check">✓</span> Content types & metadata framework</li>
+          <li class="included"><span class="check">✓</span> News, events & announcements</li>
+          <li class="included"><span class="check">✓</span> Search configuration & refiners</li>
+          <li class="included"><span class="check">✓</span> 3 Power Automate approval flows</li>
+          <li class="included"><span class="check">✓</span> Full training program</li>
+          <li class="included"><span class="check">✓</span> Governance documentation</li>
+        </ul>
+        <a href="#contact" class="pkg-btn primary-btn" onclick="openModal('Full Forge Setup')">Get Started →</a>
+      </div>
+      <div class="pkg-card reveal">
+        <div class="pkg-tier">Setup 03</div>
+        <div class="pkg-name">INDUSTRY BUILD</div>
+        <div class="pkg-price">Custom</div>
+        <div class="pkg-price-note">Industry-specific · Compliance-ready</div>
+        <div class="pkg-divider"></div>
+        <ul class="pkg-features">
+          <li class="included"><span class="check">✓</span> Vertical-specific IA templates</li>
+          <li class="included"><span class="check">✓</span> Compliance framework (HIPAA, etc.)</li>
+          <li class="included"><span class="check">✓</span> DLP & sensitivity labels</li>
+          <li class="included"><span class="check">✓</span> Full Power Platform suite</li>
+          <li class="included"><span class="check">✓</span> Power BI reporting dashboard</li>
+          <li class="included"><span class="check">✓</span> Executive sponsor training</li>
+          <li class="included"><span class="check">✓</span> Ongoing adoption program</li>
+          <li class="included"><span class="check">✓</span> Dedicated project manager</li>
+        </ul>
+        <a href="#contact" class="pkg-btn" onclick="openModal('Industry Build Setup')">Request Proposal →</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUPPORT PACKAGES -->
+  <div class="tab-content" id="tab-support">
+    <div class="packages-grid">
+      <div class="pkg-card reveal">
+        <div class="pkg-tier">Support 01</div>
+        <div class="pkg-name">ESSENTIALS</div>
+        <div class="pkg-price">$1,500<span style="font-size:1rem">/mo</span></div>
+        <div class="pkg-price-note">Month-to-month · Cancel anytime</div>
+        <div class="pkg-divider"></div>
+        <ul class="pkg-features">
+          <li class="included"><span class="check">✓</span> Up to 8 hrs support/month</li>
+          <li class="included"><span class="check">✓</span> User add/remove & permissions</li>
+          <li class="included"><span class="check">✓</span> Break-fix issue resolution</li>
+          <li class="included"><span class="check">✓</span> Monthly health check report</li>
+          <li class="included"><span class="check">✓</span> Email support (48hr response)</li>
+          <li><span class="check" style="color:var(--forge-border)">—</span> New feature builds</li>
+          <li><span class="check" style="color:var(--forge-border)">—</span> Strategy sessions</li>
+        </ul>
+        <a href="#contact" class="pkg-btn" onclick="openModal('Essentials Support')">Subscribe →</a>
+      </div>
+      <div class="pkg-card highlighted reveal">
+        <div class="pkg-badge">Recommended</div>
+        <div class="pkg-tier">Support 02</div>
+        <div class="pkg-name">GROWTH PARTNER</div>
+        <div class="pkg-price">$3,500<span style="font-size:1rem">/mo</span></div>
+        <div class="pkg-price-note">Month-to-month · Priority response</div>
+        <div class="pkg-divider"></div>
+        <ul class="pkg-features">
+          <li class="included"><span class="check">✓</span> Up to 20 hrs support/month</li>
+          <li class="included"><span class="check">✓</span> All Essentials features</li>
+          <li class="included"><span class="check">✓</span> Monthly new feature builds</li>
+          <li class="included"><span class="check">✓</span> Power Automate flow support</li>
+          <li class="included"><span class="check">✓</span> Quarterly strategy session</li>
+          <li class="included"><span class="check">✓</span> Teams/phone support (24hr)</li>
+          <li class="included"><span class="check">✓</span> Proactive governance reviews</li>
+          <li class="included"><span class="check">✓</span> User adoption reporting</li>
+        </ul>
+        <a href="#contact" class="pkg-btn primary-btn" onclick="openModal('Growth Partner Support')">Subscribe →</a>
+      </div>
+      <div class="pkg-card reveal">
+        <div class="pkg-tier">Support 03</div>
+        <div class="pkg-name">STRATEGIC ADVISOR</div>
+        <div class="pkg-price">$8,000<span style="font-size:1rem">/mo</span></div>
+        <div class="pkg-price-note">Enterprise clients · Dedicated capacity</div>
+        <div class="pkg-divider"></div>
+        <ul class="pkg-features">
+          <li class="included"><span class="check">✓</span> Unlimited support requests</li>
+          <li class="included"><span class="check">✓</span> All Growth Partner features</li>
+          <li class="included"><span class="check">✓</span> Dedicated SharePoint strategist</li>
+          <li class="included"><span class="check">✓</span> Monthly executive roadmap</li>
+          <li class="included"><span class="check">✓</span> Full Power Platform support</li>
+          <li class="included"><span class="check">✓</span> Power BI dashboard updates</li>
+          <li class="included"><span class="check">✓</span> Same-day response SLA</li>
+          <li class="included"><span class="check">✓</span> Annual technology roadmap</li>
+        </ul>
+        <a href="#contact" class="pkg-btn" onclick="openModal('Strategic Advisor Support')">Contact Us →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- INDUSTRIES -->
+<section id="industries">
+  <div class="industries-layout">
+    <div>
+      <div class="section-label reveal">// Who We Serve</div>
+      <h2 class="section-title reveal">TARGET INDUSTRIES</h2>
+      <p class="section-sub reveal">Deep domain expertise in the industries with the highest SharePoint demand and the most acute documentation pain.</p>
+      <div class="industry-list reveal">
+        <div class="industry-item active" data-industry="healthcare" onclick="showIndustry(this, 'healthcare')">
+          <span class="industry-icon">🏥</span>
+          <span class="industry-name">Healthcare & Hospital Systems</span>
+          <span class="industry-tier">Tier 1</span>
+          <span class="industry-arrow">›</span>
+        </div>
+        <div class="industry-item" data-industry="legal" onclick="showIndustry(this, 'legal')">
+          <span class="industry-icon">⚖️</span>
+          <span class="industry-name">Legal & Law Firms</span>
+          <span class="industry-tier">Tier 1</span>
+          <span class="industry-arrow">›</span>
+        </div>
+        <div class="industry-item" data-industry="finance" onclick="showIndustry(this, 'finance')">
+          <span class="industry-icon">🏦</span>
+          <span class="industry-name">Financial Services</span>
+          <span class="industry-tier">Tier 1</span>
+          <span class="industry-arrow">›</span>
+        </div>
+        <div class="industry-item" data-industry="government" onclick="showIndustry(this, 'government')">
+          <span class="industry-icon">🏛️</span>
+          <span class="industry-name">Government & Public Sector</span>
+          <span class="industry-tier">Tier 1</span>
+          <span class="industry-arrow">›</span>
+        </div>
+        <div class="industry-item" data-industry="construction" onclick="showIndustry(this, 'construction')">
+          <span class="industry-icon">🏗️</span>
+          <span class="industry-name">Construction & Engineering</span>
+          <span class="industry-tier">Tier 2</span>
+          <span class="industry-arrow">›</span>
+        </div>
+        <div class="industry-item" data-industry="education" onclick="showIndustry(this, 'education')">
+          <span class="industry-icon">🎓</span>
+          <span class="industry-name">Higher Education</span>
+          <span class="industry-tier">Tier 2</span>
+          <span class="industry-arrow">›</span>
+        </div>
+        <div class="industry-item" data-industry="defense" onclick="showIndustry(this, 'defense')">
+          <span class="industry-icon">🛡️</span>
+          <span class="industry-name">Defense Contractors</span>
+          <span class="industry-tier">Tier 2</span>
+          <span class="industry-arrow">›</span>
+        </div>
+        <div class="industry-item" data-industry="manufacturing" onclick="showIndustry(this, 'manufacturing')">
+          <span class="industry-icon">🏭</span>
+          <span class="industry-name">Manufacturing</span>
+          <span class="industry-tier">Tier 3</span>
+          <span class="industry-arrow">›</span>
+        </div>
+      </div>
+    </div>
+    <div>
+      <div class="industry-detail reveal">
+        <div class="detail-content visible" id="detail-healthcare">
+          <div class="detail-industry-name">HEALTHCARE</div>
+          <span class="detail-tag">🏥 Tier 1 Priority — Healthcare & Hospital Systems</span>
+          <p class="detail-desc">Healthcare organizations face some of the most acute document management pain in any industry — HIPAA compliance requirements, clinical policy management, credentialing files, and staff onboarding documentation create an environment where disorganized SharePoint implementations carry real regulatory and patient safety risk. This is NoCo Foundry's primary beachhead market.</p>
+          <div class="detail-pains">
+            <div class="detail-pains-title">// Key Pain Points</div>
+            <span class="pain-tag">HIPAA Compliance</span>
+            <span class="pain-tag">Policy Version Control</span>
+            <span class="pain-tag">Clinical Document Management</span>
+            <span class="pain-tag">Staff Credentialing Files</span>
+            <span class="pain-tag">Onboarding Workflows</span>
+            <span class="pain-tag">Audit Trail Requirements</span>
+          </div>
+          <div class="detail-revenue">
+            <div class="rev-item"><div class="rev-label">Migration Range</div><div class="rev-value">$18K–$80K</div></div>
+            <div class="rev-item"><div class="rev-label">Monthly Mgmt</div><div class="rev-value">$5K–$15K</div></div>
+            <div class="rev-item"><div class="rev-label">Priority</div><div class="rev-value" style="color:var(--forge-orange)">★ Primary</div></div>
+          </div>
+        </div>
+        <div class="detail-content" id="detail-legal">
+          <div class="detail-industry-name">LEGAL</div>
+          <span class="detail-tag">⚖️ Tier 1 Priority — Law Firms & Legal Services</span>
+          <p class="detail-desc">Law firms live and die by document accuracy, version control, and access security. Matter management, client confidentiality, and deadline-driven workflows create persistent pain that SharePoint — properly configured — solves comprehensively. Legal clients have strong budgets and high willingness to pay for compliance confidence.</p>
+          <div class="detail-pains">
+            <div class="detail-pains-title">// Key Pain Points</div>
+            <span class="pain-tag">Matter File Organization</span>
+            <span class="pain-tag">Document Version Chaos</span>
+            <span class="pain-tag">Client Confidentiality</span>
+            <span class="pain-tag">Deadline Tracking</span>
+            <span class="pain-tag">Conflict of Interest Checks</span>
+            <span class="pain-tag">eDiscovery Readiness</span>
+          </div>
+          <div class="detail-revenue">
+            <div class="rev-item"><div class="rev-label">Migration Range</div><div class="rev-value">$15K–$60K</div></div>
+            <div class="rev-item"><div class="rev-label">Monthly Mgmt</div><div class="rev-value">$3K–$8K</div></div>
+            <div class="rev-item"><div class="rev-label">Priority</div><div class="rev-value" style="color:var(--forge-orange)">★ Primary</div></div>
+          </div>
+        </div>
+        <div class="detail-content" id="detail-finance">
+          <div class="detail-industry-name">FINANCIAL SERVICES</div>
+          <span class="detail-tag">🏦 Tier 1 Priority — Banking, Insurance & Advisory</span>
+          <p class="detail-desc">Financial services firms face intense regulatory scrutiny requiring meticulous document management, audit trails, and access controls. SharePoint properly configured for SEC, FINRA, or SOX compliance transforms liability into competitive advantage.</p>
+          <div class="detail-pains">
+            <div class="detail-pains-title">// Key Pain Points</div>
+            <span class="pain-tag">Regulatory Compliance</span>
+            <span class="pain-tag">Audit Documentation</span>
+            <span class="pain-tag">Loan File Management</span>
+            <span class="pain-tag">Advisor Collaboration</span>
+            <span class="pain-tag">SOX Controls Documentation</span>
+            <span class="pain-tag">Client Record Management</span>
+          </div>
+          <div class="detail-revenue">
+            <div class="rev-item"><div class="rev-label">Migration Range</div><div class="rev-value">$20K–$100K</div></div>
+            <div class="rev-item"><div class="rev-label">Monthly Mgmt</div><div class="rev-value">$4K–$12K</div></div>
+            <div class="rev-item"><div class="rev-label">Priority</div><div class="rev-value" style="color:var(--forge-orange)">★ Primary</div></div>
+          </div>
+        </div>
+        <div class="detail-content" id="detail-government">
+          <div class="detail-industry-name">GOVERNMENT</div>
+          <span class="detail-tag">🏛️ Tier 1 Priority — Federal, State & Local Agencies</span>
+          <p class="detail-desc">Government agencies have large SharePoint deployments, often poorly optimized, with strong Microsoft enterprise agreements already in place. Long procurement cycles are offset by large contract values and stable, multi-year engagements.</p>
+          <div class="detail-pains">
+            <div class="detail-pains-title">// Key Pain Points</div>
+            <span class="pain-tag">Records Retention</span>
+            <span class="pain-tag">FOIA Management</span>
+            <span class="pain-tag">Public Records Compliance</span>
+            <span class="pain-tag">Inter-Agency Sharing</span>
+            <span class="pain-tag">FedRAMP Requirements</span>
+            <span class="pain-tag">Legacy System Migration</span>
+          </div>
+          <div class="detail-revenue">
+            <div class="rev-item"><div class="rev-label">Migration Range</div><div class="rev-value">$40K–$150K</div></div>
+            <div class="rev-item"><div class="rev-label">Monthly Mgmt</div><div class="rev-value">$5K–$20K</div></div>
+            <div class="rev-item"><div class="rev-label">Priority</div><div class="rev-value" style="color:var(--forge-orange)">★ Primary</div></div>
+          </div>
+        </div>
+        <div class="detail-content" id="detail-construction">
+          <div class="detail-industry-name">CONSTRUCTION</div>
+          <span class="detail-tag">🏗️ Tier 2 — Construction & Engineering Firms</span>
+          <p class="detail-desc">Construction firms generate enormous volumes of project documentation — drawings, RFIs, submittals, change orders, and subcontractor communications — that demand structured management. SharePoint serves as the project document hub connecting field and office.</p>
+          <div class="detail-pains">
+            <div class="detail-pains-title">// Key Pain Points</div>
+            <span class="pain-tag">Drawing Version Control</span>
+            <span class="pain-tag">RFI & Submittal Tracking</span>
+            <span class="pain-tag">Subcontractor Docs</span>
+            <span class="pain-tag">Safety Documentation</span>
+            <span class="pain-tag">Project Closeout Packages</span>
+          </div>
+          <div class="detail-revenue">
+            <div class="rev-item"><div class="rev-label">Migration Range</div><div class="rev-value">$12K–$45K</div></div>
+            <div class="rev-item"><div class="rev-label">Monthly Mgmt</div><div class="rev-value">$2.5K–$6K</div></div>
+            <div class="rev-item"><div class="rev-label">Priority</div><div class="rev-value" style="color:var(--forge-amber)">Tier 2</div></div>
+          </div>
+        </div>
+        <div class="detail-content" id="detail-education">
+          <div class="detail-industry-name">HIGHER EDUCATION</div>
+          <span class="detail-tag">🎓 Tier 2 — Universities & Colleges</span>
+          <p class="detail-desc">Universities face unique SharePoint challenges across faculty collaboration, accreditation documentation, grant management, and institutional knowledge preservation. Many institutions have M365 licenses but dramatically under-utilize SharePoint capabilities.</p>
+          <div class="detail-pains">
+            <div class="detail-pains-title">// Key Pain Points</div>
+            <span class="pain-tag">Accreditation Documentation</span>
+            <span class="pain-tag">Faculty Collaboration</span>
+            <span class="pain-tag">Grant Management</span>
+            <span class="pain-tag">Policy Libraries</span>
+            <span class="pain-tag">Student Services Workflows</span>
+          </div>
+          <div class="detail-revenue">
+            <div class="rev-item"><div class="rev-label">Migration Range</div><div class="rev-value">$15K–$50K</div></div>
+            <div class="rev-item"><div class="rev-label">Monthly Mgmt</div><div class="rev-value">$3K–$10K</div></div>
+            <div class="rev-item"><div class="rev-label">Priority</div><div class="rev-value" style="color:var(--forge-amber)">Tier 2</div></div>
+          </div>
+        </div>
+        <div class="detail-content" id="detail-defense">
+          <div class="detail-industry-name">DEFENSE CONTRACTORS</div>
+          <span class="detail-tag">🛡️ Tier 2 — DoD Contractors & Defense Primes</span>
+          <p class="detail-desc">Defense contractors operate under strict ITAR and DFARS compliance requirements with clearance-based access controls. Proper SharePoint implementation is a contract requirement in many cases, and the penalty for non-compliance is contract loss.</p>
+          <div class="detail-pains">
+            <div class="detail-pains-title">// Key Pain Points</div>
+            <span class="pain-tag">ITAR Compliance</span>
+            <span class="pain-tag">Clearance-Based Access</span>
+            <span class="pain-tag">CMMC Requirements</span>
+            <span class="pain-tag">CUI Data Handling</span>
+            <span class="pain-tag">Audit Readiness</span>
+          </div>
+          <div class="detail-revenue">
+            <div class="rev-item"><div class="rev-label">Migration Range</div><div class="rev-value">$25K–$100K</div></div>
+            <div class="rev-item"><div class="rev-label">Monthly Mgmt</div><div class="rev-value">$6K–$18K</div></div>
+            <div class="rev-item"><div class="rev-label">Priority</div><div class="rev-value" style="color:var(--forge-amber)">Tier 2</div></div>
+          </div>
+        </div>
+        <div class="detail-content" id="detail-manufacturing">
+          <div class="detail-industry-name">MANUFACTURING</div>
+          <span class="detail-tag">🏭 Tier 3 — Manufacturing & Industrial</span>
+          <p class="detail-desc">Manufacturers benefit from SharePoint for quality management documentation, ISO compliance, SOP libraries, and production reporting. Power Automate integration with ERP systems creates significant cross-sell opportunities.</p>
+          <div class="detail-pains">
+            <div class="detail-pains-title">// Key Pain Points</div>
+            <span class="pain-tag">ISO Documentation</span>
+            <span class="pain-tag">SOP Libraries</span>
+            <span class="pain-tag">Quality Management</span>
+            <span class="pain-tag">Safety Records</span>
+            <span class="pain-tag">Equipment Maintenance Logs</span>
+          </div>
+          <div class="detail-revenue">
+            <div class="rev-item"><div class="rev-label">Migration Range</div><div class="rev-value">$10K–$35K</div></div>
+            <div class="rev-item"><div class="rev-label">Monthly Mgmt</div><div class="rev-value">$2K–$5K</div></div>
+            <div class="rev-item"><div class="rev-label">Priority</div><div class="rev-value" style="color:var(--forge-steel)">Tier 3</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROCESS -->
+<section id="process">
+  <div class="reveal" style="text-align:center; max-width: 600px; margin: 0 auto 1rem;">
+    <div class="section-label">// How We Work</div>
+    <h2 class="section-title">THE FOUNDRY PROCESS</h2>
+    <p class="section-sub" style="margin: 0 auto;">Every engagement follows a proven 5-phase delivery methodology built for speed, clarity, and zero surprises.</p>
+  </div>
+  <div class="process-steps">
+    <div class="process-step reveal">
+      <div class="step-num">01</div>
+      <div class="step-name">Discover</div>
+      <p class="step-desc">Deep-dive requirements session. We map your current state, pain points, and success metrics before a single line of work begins.</p>
+    </div>
+    <div class="process-step reveal">
+      <div class="step-num">02</div>
+      <div class="step-name">Architect</div>
+      <p class="step-desc">Solution design and information architecture. You see exactly what we're building before we build it — no surprises.</p>
+    </div>
+    <div class="process-step reveal">
+      <div class="step-num">03</div>
+      <div class="step-name">Build</div>
+      <p class="step-desc">Rapid development and configuration in your Microsoft 365 tenant, with weekly progress check-ins and milestone reviews.</p>
+    </div>
+    <div class="process-step reveal">
+      <div class="step-num">04</div>
+      <div class="step-name">Launch</div>
+      <p class="step-desc">Go-live with user training, adoption support, and a 30-day hypercare period to ensure smooth transition.</p>
+    </div>
+    <div class="process-step reveal">
+      <div class="step-num">05</div>
+      <div class="step-name">Optimize</div>
+      <p class="step-desc">Ongoing refinement, feature expansion, and strategic guidance to compound your Microsoft 365 investment over time.</p>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="contact-grid">
+    <div>
+      <div class="section-label reveal">// Let's Talk</div>
+      <h2 class="section-title reveal">START YOUR<br>FORGE</h2>
+      <p class="section-sub reveal">Book a free 30-minute discovery call. We'll map your current environment, identify your biggest pain points, and outline a clear path forward — no commitment required.</p>
+      <div class="contact-perks reveal">
+        <div class="perk-item">
+          <div class="perk-icon">🎯</div>
+          <div>
+            <div class="perk-name">Free Environment Assessment</div>
+            <p class="perk-desc">We audit your current SharePoint or file storage setup and identify your highest-impact opportunities at no charge.</p>
+          </div>
+        </div>
+        <div class="perk-item">
+          <div class="perk-icon">📋</div>
+          <div>
+            <div class="perk-name">Proposal Within 48 Hours</div>
+            <p class="perk-desc">After your discovery call, you'll receive a clear, fixed-price proposal with defined deliverables and timeline — no guesswork.</p>
+          </div>
+        </div>
+        <div class="perk-item">
+          <div class="perk-icon">🛡️</div>
+          <div>
+            <div class="perk-name">Delivery Guarantee</div>
+            <p class="perk-desc">Every project comes with a satisfaction guarantee. If we miss agreed milestones, you receive a credit — no questions asked.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="reveal">
+      <form class="contact-form" id="contactForm" onsubmit="handleSubmit(event)">
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">First Name</label>
+            <input type="text" class="form-input" placeholder="John" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Last Name</label>
+            <input type="text" class="form-input" placeholder="Smith" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Work Email</label>
+          <input type="email" class="form-input" placeholder="john@company.com" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Company</label>
+          <input type="text" class="form-input" placeholder="Company Name" required>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Service Interest</label>
+          <select class="form-select form-input">
+            <option value="">Select a service...</option>
+            <option>SharePoint Migration</option>
+            <option>SharePoint Setup / Intranet Build</option>
+            <option>Ongoing Monthly Management</option>
+            <option>Power Automate Workflows</option>
+            <option>PowerApps Development</option>
+            <option>Power BI Dashboards</option>
+            <option>Full Microsoft 365 Transformation</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Industry</label>
+          <select class="form-select form-input">
+            <option value="">Select your industry...</option>
+            <option>Healthcare</option>
+            <option>Legal</option>
+            <option>Financial Services</option>
+            <option>Government / Public Sector</option>
+            <option>Construction / Engineering</option>
+            <option>Higher Education</option>
+            <option>Defense / Aerospace</option>
+            <option>Manufacturing</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tell Us About Your Challenge</label>
+          <textarea class="form-textarea form-input" placeholder="Briefly describe your current situation and what you're hoping to solve..."></textarea>
+        </div>
+        <button type="submit" class="form-submit">
+          <span>Book Your Free Discovery Call</span>
+          <span>→</span>
+        </button>
+      </form>
+      <div class="success-msg" id="successMsg">
+        <div class="success-icon">🔥</div>
+        <div class="success-title">YOU'RE IN THE FORGE</div>
+        <p class="success-desc">We've received your request and will reach out within 24 hours to schedule your free discovery call.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <a href="#hero" class="nav-logo" style="margin-bottom:1rem; display:inline-flex;">
+        <div class="nav-logo-mark"></div>
+        <span class="nav-logo-text" style="margin-left:12px">NOCO<span>.</span>FOUNDRY</span>
+      </a>
+      <p>Microsoft 365 & SharePoint consulting specialists. We transform document chaos into structured, compliant, intelligent digital workplaces.</p>
+    </div>
+    <div>
+      <div class="footer-col-title">Services</div>
+      <ul class="footer-links">
+        <li><a href="#services">SharePoint Migration</a></li>
+        <li><a href="#services">SharePoint Setup</a></li>
+        <li><a href="#services">Monthly Management</a></li>
+        <li><a href="#services">Power Automate</a></li>
+        <li><a href="#services">PowerApps</a></li>
+        <li><a href="#services">Power BI</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">Industries</div>
+      <ul class="footer-links">
+        <li><a href="#industries">Healthcare</a></li>
+        <li><a href="#industries">Legal</a></li>
+        <li><a href="#industries">Financial Services</a></li>
+        <li><a href="#industries">Government</a></li>
+        <li><a href="#industries">Construction</a></li>
+        <li><a href="#industries">Higher Education</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="footer-col-title">Company</div>
+      <ul class="footer-links">
+        <li><a href="#process">Our Process</a></li>
+        <li><a href="#packages">Packages</a></li>
+        <li><a href="#contact">Book a Call</a></li>
+        <li><a href="#contact">Get a Proposal</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div class="footer-copy">© 2025 <span>NoCo Foundry LLC</span> · All rights reserved</div>
+    <div class="footer-copy">Built on <span>Microsoft 365</span> · Powered by expertise</div>
+  </div>
+</footer>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModalOutside(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <div class="modal-title">LET'S TALK</div>
+    <p class="modal-sub" id="modalSub">Tell us about your project and we'll follow up within 24 hours.</p>
+    <form class="modal-form" onsubmit="handleModalSubmit(event)">
+      <div class="form-group">
+        <label class="form-label">Name</label>
+        <input type="text" class="form-input" placeholder="Your name" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Work Email</label>
+        <input type="email" class="form-input" placeholder="you@company.com" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Package Interest</label>
+        <input type="text" class="form-input" id="modalPackage" readonly style="color:var(--forge-orange);">
+      </div>
+      <button type="submit" class="modal-submit">Request This Package →</button>
+    </form>
+  </div>
+</div>
+
+<script>
+  // CURSOR
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  let mx = 0, my = 0, rx = 0, ry = 0;
+  document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; cursor.style.left = mx + 'px'; cursor.style.top = my + 'px'; });
+  function animateRing() { rx += (mx - rx) * 0.12; ry += (my - ry) * 0.12; ring.style.left = rx + 'px'; ring.style.top = ry + 'px'; requestAnimationFrame(animateRing); }
+  animateRing();
+
+  // NAV TOGGLE
+  document.getElementById('navToggle').addEventListener('click', () => {
+    document.getElementById('navLinks').classList.toggle('open');
+  });
+
+  // TABS
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    });
+  });
+
+  // INDUSTRY DETAIL
+  function showIndustry(el, id) {
+    document.querySelectorAll('.industry-item').forEach(i => i.classList.remove('active'));
+    document.querySelectorAll('.detail-content').forEach(d => d.classList.remove('visible'));
+    el.classList.add('active');
+    const detail = document.getElementById('detail-' + id);
+    if (detail) detail.classList.add('visible');
+  }
+
+  // SCROLL REVEAL
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); } });
+  }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // MODAL
+  function openModal(pkg) {
+    document.getElementById('modalPackage').value = pkg;
+    document.getElementById('modalSub').textContent = `You've selected: ${pkg}. Fill out the form and we'll follow up within 24 hours.`;
+    document.getElementById('modalOverlay').classList.add('open');
+  }
+  function closeModal() { document.getElementById('modalOverlay').classList.remove('open'); }
+  function closeModalOutside(e) { if (e.target === document.getElementById('modalOverlay')) closeModal(); }
+  function handleModalSubmit(e) { e.preventDefault(); closeModal(); }
+
+  // CONTACT FORM
+  function handleSubmit(e) {
+    e.preventDefault();
+    document.getElementById('contactForm').style.display = 'none';
+    document.getElementById('successMsg').classList.add('show');
+  }
+
+  // NAV ACTIVE
+  const sections = document.querySelectorAll('section[id]');
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(s => { if (window.scrollY >= s.offsetTop - 120) current = s.id; });
+    document.querySelectorAll('.nav-links a').forEach(a => {
+      a.style.color = a.getAttribute('href') === '#' + current ? 'var(--forge-white)' : '';
+    });
+  });
+</script>
+</body>
+</html>
